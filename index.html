@@ -12,9 +12,8 @@
   :root { --bg:#0a0a0a; --fg:#f5f5f5; --accent:#7c3aed; --muted:#888; }
   html { scroll-behavior: smooth; }
   body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--fg); overflow-x:hidden; }
-  canvas { display:block; }
-
-  #canvas-wrap { position:fixed; inset:0; z-index:0; }
+  
+  #canvas-wrap { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
 
   .hero-content {
     position:relative; z-index:2; display:flex; flex-direction:column;
@@ -58,6 +57,12 @@
 
   footer { padding:2rem 6vw; color:var(--muted); font-size:.85rem; border-top:1px solid #1a1a1a; }
 </style>
+
+<!-- THESE TWO SCRIPTS ARE LOADED NORMALLY SO GITHUB CAN RUN THEM -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
 </head>
 <body>
 
@@ -75,7 +80,7 @@
     <p class="about-text">
       Hi, main ek creative developer hoon jo immersive web experiences banata hai.
       Main 3D, animations aur modern UI/UX ke saath kaam karta hoon. Yeh text aap apne
-      hisaab se change kar sakte hain — apna intro, skills aur experience yahan likhein.
+      hisaab se change kar sakte hain.
     </p>
   </section>
 
@@ -91,108 +96,110 @@
       <a href="mailto:you@example.com">Email</a>
       <a href="https://github.com/yourusername" target="_blank" rel="noreferrer">GitHub</a>
       <a href="https://linkedin.com/in/yourusername" target="_blank" rel="noreferrer">LinkedIn</a>
-      <a href="https://twitter.com/yourusername" target="_blank" rel="noreferrer">Twitter</a>
     </div>
   </section>
 
   <footer>© <span id="year"></span> Your Name — All rights reserved.</footer>
 </main>
 
-<!-- Three.js -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.min.js"></script>
-<!-- GSAP + ScrollTrigger -->
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-
 <script>
-  gsap.registerPlugin(ScrollTrigger);
-  document.getElementById('year').textContent = new Date().getFullYear();
+  // Wait for page to load
+  window.onload = function() {
+    gsap.registerPlugin(ScrollTrigger);
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-  /* ---------- Projects data (yahan apne projects daalein) ---------- */
-  const projects = [
-    { title:'Project One', description:'Ek 3D interactive website jo WebGL aur GSAP par based hai. Apna description likhein.', tags:['React','Three.js','GSAP'] },
-    { title:'Project Two', description:'Ek AI-powered dashboard. Apna description likhein.', tags:['Next.js','OpenAI','Tailwind'] },
-    { title:'Project Three', description:'Ek mobile app jo productivity mein help karta hai. Apna description likhein.', tags:['React Native','Firebase'] }
-  ];
-  document.getElementById('project-grid').innerHTML = projects.map(p => `
-    <div class="project-card">
-      <h3>${p.title}</h3>
-      <p>${p.description}</p>
-      <div class="tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-    </div>
-  `).join('');
+    // Project Data
+    const projects = [
+      { title:'Project One', description:'Ek 3D interactive website jo WebGL aur GSAP par based hai.', tags:['React','Three.js','GSAP'] },
+      { title:'Project Two', description:'Ek AI-powered dashboard.', tags:['Next.js','OpenAI','Tailwind'] },
+      { title:'Project Three', description:'Ek mobile app jo productivity mein help karta hai.', tags:['React Native','Firebase'] }
+    ];
+    document.getElementById('project-grid').innerHTML = projects.map(p => `
+      <div class="project-card">
+        <h3>${p.title}</h3>
+        <p>${p.description}</p>
+        <div class="tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+    `).join('');
 
-  /* ---------- Three.js scene ---------- */
-  const wrap = document.getElementById('canvas-wrap');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 100);
-  camera.position.set(0, 0, 6);
+    // --- 3D SCENE SETUP ---
+    const wrap = document.getElementById('canvas-wrap');
+    const scene = new THREE.Scene();
+    
+    const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 6);
 
-  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-  renderer.setSize(innerWidth, innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  wrap.appendChild(renderer.domElement);
-
-  // Lights
-  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-  const dir = new THREE.DirectionalLight(0xffffff, 1.2); dir.position.set(5,5,5); scene.add(dir);
-  const p1 = new THREE.PointLight(0x7c3aed, 0.8); p1.position.set(-5,-5,-5); scene.add(p1);
-
-  // Group jisme shapes hain (scroll par yeh move hoga)
-  const group = new THREE.Group();
-  scene.add(group);
-
-  // TorusKnot (wireframe)
-  const knot = new THREE.Mesh(
-    new THREE.TorusKnotGeometry(1.1, 0.35, 200, 32),
-    new THREE.MeshStandardMaterial({ color:0x7c3aed, metalness:0.9, roughness:0.15, wireframe:true })
-  );
-  group.add(knot);
-
-  // Icosahedron (chhota, andar)
-  const ico = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(0.7, 0),
-    new THREE.MeshStandardMaterial({ color:0xe11d48, metalness:0.8, roughness:0.2 })
-  );
-  group.add(ico);
-
-  // Scroll par group neeche "dive" karega + rotate hoga
-  gsap.to(group.position, {
-    y: -12, z: -20,
-    scrollTrigger: { trigger: document.body, start:'top top', end:'bottom bottom', scrub:1.2 }
-  });
-  gsap.to(group.rotation, {
-    x: Math.PI * 1.5, y: Math.PI * 2,
-    scrollTrigger: { trigger: document.body, start:'top top', end:'bottom bottom', scrub:1.2 }
-  });
-
-  // Har section fade-in on scroll
-  gsap.utils.toArray('.section').forEach(section => {
-    gsap.from(section, {
-      opacity: 0, y: 80, duration: 1,
-      scrollTrigger: { trigger: section, start: 'top 80%', toggleActions:'play none none reverse' }
-    });
-  });
-
-  // Animation loop
-  let t = 0;
-  function animate() {
-    requestAnimationFrame(animate);
-    t += 0.01;
-    knot.rotation.y += 0.003;
-    ico.rotation.x += 0.005;
-    ico.rotation.y += 0.007;
-    group.position.x = Math.sin(t) * 0.3; // halka float
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  // Resize handle
-  addEventListener('resize', () => {
-    camera.aspect = innerWidth/innerHeight;
-    camera.updateProjectionMatrix();
+    const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
     renderer.setSize(innerWidth, innerHeight);
-  });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    wrap.appendChild(renderer.domElement);
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.5); 
+    dir.position.set(5, 5, 5); 
+    scene.add(dir);
+    const p1 = new THREE.PointLight(0x7c3aed, 1); 
+    p1.position.set(-5, -5, -5); 
+    scene.add(p1);
+
+    // 3D Objects
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const knot = new THREE.Mesh(
+      new THREE.TorusKnotGeometry(1.1, 0.35, 200, 32),
+      new THREE.MeshStandardMaterial({ color:0x7c3aed, metalness:0.9, roughness:0.15, wireframe:true })
+    );
+    group.add(knot);
+
+    const ico = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.7, 0),
+      new THREE.MeshStandardMaterial({ color:0xe11d48, metalness:0.8, roughness:0.2 })
+    );
+    group.add(ico);
+
+    // --- SCROLL ANIMATIONS ---
+    gsap.to(group.position, {
+      y: -12, z: -20,
+      scrollTrigger: { trigger: document.body, start:'top top', end:'bottom bottom', scrub:1.2 }
+    });
+    gsap.to(group.rotation, {
+      x: Math.PI * 1.5, y: Math.PI * 2,
+      scrollTrigger: { trigger: document.body, start:'top top', end:'bottom bottom', scrub:1.2 }
+    });
+
+    gsap.utils.toArray('.section').forEach(section => {
+      gsap.from(section, {
+        opacity: 0, y: 80, duration: 1,
+        scrollTrigger: { trigger: section, start: 'top 80%', toggleActions:'play none none reverse' }
+      });
+    });
+
+    // --- ANIMATION LOOP ---
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+      
+      knot.rotation.y += 0.005;
+      knot.rotation.x += 0.002;
+      ico.rotation.x -= 0.005;
+      ico.rotation.y -= 0.005;
+      
+      group.position.x = Math.sin(t) * 0.3; 
+      
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // --- RESIZE ---
+    window.addEventListener('resize', () => {
+      camera.aspect = innerWidth/innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+  };
 </script>
 </body>
 </html>
