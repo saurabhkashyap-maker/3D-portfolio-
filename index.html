@@ -13,10 +13,10 @@
   html { scroll-behavior: smooth; }
   body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--fg); overflow-x:hidden; }
   
-  /* Canvas Fixed */
+  /* Canvas hamesha fixed rahega */
   #canvas-wrap { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
 
-  /* Hero */
+  /* Hero Section */
   .hero-content {
     position:relative; z-index:2; display:flex; flex-direction:column;
     justify-content:center; height:100vh; padding:0 6vw; pointer-events:none;
@@ -30,13 +30,20 @@
   }
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 
-  /* Sections */
-  main { position:relative; z-index:1; background:var(--bg); }
+  /* Main Container */
+  main { position:relative; z-index:1; }
+
+  /* Har section full screen lega */
   .section { 
-    min-height:100vh; padding:6rem 6vw; position:relative; 
-    display: flex; flex-direction: column; justify-content: center;
+    min-height: 100vh; 
+    padding: 8rem 6vw; 
+    position: relative; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center;
   }
   
+  /* Text Box (Glassmorphism) */
   .content-box {
     background: rgba(15, 15, 15, 0.85);
     backdrop-filter: blur(12px);
@@ -84,7 +91,7 @@
 
 <div id="canvas-wrap"></div>
 
-<!-- HERO -->
+<!-- HERO SECTION -->
 <div class="hero-content">
   <h1>Creative Developer<br />& UI/UX Designer</h1>
   <p>3D, WebGL, animations aur modern web experiences banata hoon. Scroll karein aur dekhein.</p>
@@ -92,7 +99,7 @@
 </div>
 
 <main>
-  <!-- ABOUT -->
+  <!-- ABOUT SECTION -->
   <section class="section" id="about">
     <div class="content-box">
       <h2>About <span>Me</span></h2>
@@ -104,7 +111,7 @@
     </div>
   </section>
 
-  <!-- PROJECTS -->
+  <!-- PROJECTS SECTION -->
   <section class="section" id="projects">
     <div class="content-box">
       <h2>Featured <span>Work</span></h2>
@@ -112,7 +119,7 @@
     </div>
   </section>
 
-  <!-- CONTACT -->
+  <!-- CONTACT SECTION -->
   <section class="section" id="contact">
     <div class="content-box">
       <h2>Let's <span>Talk</span></h2>
@@ -186,39 +193,39 @@
     );
     group.add(ico);
 
-    // --- ANIMATION TIMELINE (Fix) ---
-    // Ab hum scroll trigger ko har section se nahi, balki pura page scroll hone se jodenge
-    // Aur duration badha denge taaki wo jaldi khatam na ho
+    // --- SCROLL TIMELINE ---
+    // Ab maine duration bahut badha di hai aur "scrub" lagaya hai
+    // "end: bottom bottom" ka matlab page khatam hone tak chalega
     
     let tl = gsap.timeline({
       scrollTrigger: {
         trigger: "body",
         start: "top top",
-        end: "bottom bottom",
-        scrub: 1, 
-        // Yeh line ensure karegi ki animation pure scroll me chale
-        invalidateOnRefresh: true 
+        end: "bottom bottom", 
+        scrub: 1.5, // Smoothness
+        invalidateOnRefresh: true
       }
     });
 
-    // Animation Steps (Har step 3 seconds lega)
-    // Step 1: Hero to About
-    tl.to(group.position, { y: -1, z: -0.5, duration: 3 }, 0)
-      .to(group.rotation, { x: Math.PI * 1.5, y: Math.PI * 1.5, duration: 3 }, 0)
+    // Animation Sequence (Har step 10 units lamba hai)
+    // Step 1: Hero se About
+    tl.to(group.position, { y: -1.5, z: -1, duration: 10 }, 0)
+      .to(group.rotation, { x: Math.PI * 2, y: Math.PI * 2, duration: 10 }, 0)
+      
+    // Step 2: About se Projects (Side me jayega)
+      .to(group.position, { x: isMobile ? -1 : -2, y: -3, z: -2, duration: 10 }, 10)
+      .to(group.rotation, { x: Math.PI * 4, y: Math.PI * 4, duration: 10 }, 10)
+      
+    // Step 3: Projects se Contact (Center me aayega aur zoom hoga)
+      .to(group.position, { x: 0, y: -4.5, z: -3, duration: 10 }, 20)
+      .to(group.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 10 }, 20)
+      .to(group.rotation, { x: Math.PI * 6, y: Math.PI * 6, duration: 10 }, 20);
 
-    // Step 2: About to Projects (Shape side me jayegi)
-      .to(group.position, { x: isMobile ? -1 : -2, y: -3, z: -1, duration: 3 }, 3)
-      .to(group.rotation, { x: Math.PI * 3, y: Math.PI * 3, duration: 3 }, 3)
-
-    // Step 3: Projects to Contact (Shape wapas center me)
-      .to(group.position, { x: 0, y: -5, z: -2, duration: 3 }, 6)
-      .to(group.rotation, { x: Math.PI * 4.5, y: Math.PI * 4.5, duration: 3 }, 6);
-
-    // Fade in boxes
+    // Text boxes fade-in
     gsap.utils.toArray('.section').forEach(section => {
       gsap.from(section.querySelector('.content-box'), {
         opacity: 0, y: 40, duration: 0.8,
-        scrollTrigger: { trigger: section, start: 'top 80%' }
+        scrollTrigger: { trigger: section, start: 'top 85%' }
       });
     });
 
@@ -227,7 +234,7 @@
     function animate() {
       requestAnimationFrame(animate);
       
-      // Shape hamesha dheere-dheere ghumti rahegi
+      // Constant rotation
       knot.rotation.y += 0.003;
       ico.rotation.x -= 0.004;
       ico.rotation.y -= 0.004;
@@ -236,7 +243,7 @@
     }
     animate();
 
-    // Resize
+    // Resize handler
     window.addEventListener('resize', () => {
       camera.aspect = innerWidth/innerHeight;
       camera.updateProjectionMatrix();
