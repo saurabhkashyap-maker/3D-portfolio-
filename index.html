@@ -13,10 +13,10 @@
   html { scroll-behavior: smooth; }
   body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--fg); overflow-x:hidden; }
   
-  /* Fixed Canvas for 3D */
+  /* Canvas Fixed */
   #canvas-wrap { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
 
-  /* Hero Section */
+  /* Hero */
   .hero-content {
     position:relative; z-index:2; display:flex; flex-direction:column;
     justify-content:center; height:100vh; padding:0 6vw; pointer-events:none;
@@ -30,23 +30,23 @@
   }
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 
-  /* Main Sections */
+  /* Sections */
   main { position:relative; z-index:1; background:var(--bg); }
   .section { 
     min-height:100vh; padding:6rem 6vw; position:relative; 
     display: flex; flex-direction: column; justify-content: center;
   }
   
-  /* Text background overlay */
   .content-box {
-    background: rgba(10, 10, 10, 0.75);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 2rem;
+    background: rgba(15, 15, 15, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 2.5rem;
     border-radius: 24px;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
     max-width: 800px;
     width: 100%;
+    margin: 0 auto;
   }
 
   .section h2 { font-size:clamp(2rem,5vw,4rem); font-weight:800; margin-bottom:2rem; letter-spacing:-0.02em; }
@@ -55,15 +55,13 @@
   .project-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.5rem; }
   .project-card {
     background:#141414; border:1px solid #222; border-radius:16px; padding:1.5rem;
-    transition:transform .4s ease,border-color .4s ease;
   }
-  .project-card:hover { transform:translateY(-6px); border-color:var(--accent); }
   .project-card h3 { font-size:1.3rem; margin-bottom:.75rem; }
   .project-card p { color:var(--muted); font-size:.95rem; line-height:1.6; }
   .project-card .tags { margin-top:1.5rem; display:flex; gap:.5rem; flex-wrap:wrap; }
   .project-card .tag {
     font-size:.7rem; padding:.35rem .75rem; border:1px solid #333; border-radius:999px;
-    color:var(--muted); text-transform:uppercase; letter-spacing:.05em;
+    color:var(--muted); text-transform:uppercase;
   }
 
   .about-text { color:var(--muted); font-size:1.1rem; line-height:1.8; }
@@ -71,9 +69,8 @@
   .contact-links { display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:2rem; }
   .contact-links a {
     color:var(--fg); text-decoration:none; font-size:1.1rem;
-    border-bottom:1px solid var(--accent); padding-bottom:.25rem; transition:color .3s;
+    border-bottom:1px solid var(--accent); padding-bottom:.25rem;
   }
-  .contact-links a:hover { color:var(--accent); }
 
   footer { padding:2rem 6vw; color:var(--muted); font-size:.85rem; border-top:1px solid #1a1a1a; text-align: center; position: relative; z-index: 2; background: var(--bg); }
 </style>
@@ -87,7 +84,7 @@
 
 <div id="canvas-wrap"></div>
 
-<!-- HERO SECTION -->
+<!-- HERO -->
 <div class="hero-content">
   <h1>Creative Developer<br />& UI/UX Designer</h1>
   <p>3D, WebGL, animations aur modern web experiences banata hoon. Scroll karein aur dekhein.</p>
@@ -95,7 +92,7 @@
 </div>
 
 <main>
-  <!-- ABOUT SECTION -->
+  <!-- ABOUT -->
   <section class="section" id="about">
     <div class="content-box">
       <h2>About <span>Me</span></h2>
@@ -107,7 +104,7 @@
     </div>
   </section>
 
-  <!-- PROJECTS SECTION -->
+  <!-- PROJECTS -->
   <section class="section" id="projects">
     <div class="content-box">
       <h2>Featured <span>Work</span></h2>
@@ -115,7 +112,7 @@
     </div>
   </section>
 
-  <!-- CONTACT SECTION -->
+  <!-- CONTACT -->
   <section class="section" id="contact">
     <div class="content-box">
       <h2>Let's <span>Talk</span></h2>
@@ -136,7 +133,7 @@
     gsap.registerPlugin(ScrollTrigger);
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // --- DATA ---
+    // Projects Data
     const projects = [
       { title:'Project One', description:'Ek 3D interactive website jo WebGL aur GSAP par based hai.', tags:['React','Three.js','GSAP'] },
       { title:'Project Two', description:'Ek AI-powered dashboard.', tags:['Next.js','OpenAI','Tailwind'] },
@@ -150,16 +147,14 @@
       </div>
     `).join('');
 
-    // --- 3D SCENE SETUP ---
+    // 3D Setup
     const wrap = document.getElementById('canvas-wrap');
     const scene = new THREE.Scene();
     
-    // Mobile aur Desktop ke hisaab se camera adjust karna
+    // Mobile responsive camera
     const isMobile = window.innerWidth < 768;
     const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 100);
-    
-    // Agar mobile hai to camera thoda peeche (zoom out) hoga taaki shape puri dikhe
-    camera.position.set(0, 0, isMobile ? 10 : 6);
+    camera.position.set(0, 0, isMobile ? 9 : 6);
 
     const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
     renderer.setSize(innerWidth, innerHeight);
@@ -167,7 +162,7 @@
     wrap.appendChild(renderer.domElement);
 
     // Lights
-    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
     const dir = new THREE.DirectionalLight(0xffffff, 1.5); 
     dir.position.set(5, 5, 5); 
     scene.add(dir);
@@ -175,73 +170,73 @@
     p1.position.set(-5, -5, -5); 
     scene.add(p1);
 
-    // 3D Objects
+    // Main Group
     const group = new THREE.Group();
     scene.add(group);
 
-    // Main wireframe object
     const knot = new THREE.Mesh(
       new THREE.TorusKnotGeometry(1.2, 0.35, 200, 32),
       new THREE.MeshStandardMaterial({ color:0x7c3aed, metalness:0.9, roughness:0.15, wireframe:true })
     );
     group.add(knot);
 
-    // Inner solid object
     const ico = new THREE.Mesh(
       new THREE.IcosahedronGeometry(0.8, 0),
       new THREE.MeshStandardMaterial({ color:0xe11d48, metalness:0.8, roughness:0.2 })
     );
     group.add(ico);
 
-    // --- FULL PAGE SCROLL ANIMATION (RESPONSIVE) ---
-    // Mobile par shape kam move karegi taaki screen se bahar na jaye
-    const moveDist = isMobile ? 0.5 : 1;
-
-    const tl = gsap.timeline({
+    // --- ANIMATION TIMELINE (Fix) ---
+    // Ab hum scroll trigger ko har section se nahi, balki pura page scroll hone se jodenge
+    // Aur duration badha denge taaki wo jaldi khatam na ho
+    
+    let tl = gsap.timeline({
       scrollTrigger: {
         trigger: "body",
         start: "top top",
         end: "bottom bottom",
-        scrub: 1.5,
+        scrub: 1, 
+        // Yeh line ensure karegi ki animation pure scroll me chale
+        invalidateOnRefresh: true 
       }
     });
 
-    // 1. HERO to ABOUT (Object neeche jayega)
-    tl.to(group.position, { y: -2 * moveDist, z: -1, duration: 2 }, 0)
-      .to(group.rotation, { x: Math.PI * 2, y: Math.PI * 2, duration: 2 }, 0)
-      
-    // 2. ABOUT to PROJECTS (Object side me jayega)
-      .to(group.position, { x: isMobile ? -1 : -3, y: -4 * moveDist, z: -2, duration: 2 }, 2)
-      .to(group.rotation, { x: Math.PI * 4, y: Math.PI * 4, duration: 2 }, 2)
-      
-    // 3. PROJECTS to CONTACT (Object wapas center me)
-      .to(group.position, { x: 0, y: -6 * moveDist, z: -3, duration: 2 }, 4)
-      .to(group.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 2 }, 4)
-      .to(group.rotation, { x: Math.PI * 6, y: Math.PI * 6, duration: 2 }, 4);
+    // Animation Steps (Har step 3 seconds lega)
+    // Step 1: Hero to About
+    tl.to(group.position, { y: -1, z: -0.5, duration: 3 }, 0)
+      .to(group.rotation, { x: Math.PI * 1.5, y: Math.PI * 1.5, duration: 3 }, 0)
 
-    // Text sections fade in
+    // Step 2: About to Projects (Shape side me jayegi)
+      .to(group.position, { x: isMobile ? -1 : -2, y: -3, z: -1, duration: 3 }, 3)
+      .to(group.rotation, { x: Math.PI * 3, y: Math.PI * 3, duration: 3 }, 3)
+
+    // Step 3: Projects to Contact (Shape wapas center me)
+      .to(group.position, { x: 0, y: -5, z: -2, duration: 3 }, 6)
+      .to(group.rotation, { x: Math.PI * 4.5, y: Math.PI * 4.5, duration: 3 }, 6);
+
+    // Fade in boxes
     gsap.utils.toArray('.section').forEach(section => {
       gsap.from(section.querySelector('.content-box'), {
-        opacity: 0, y: 50, duration: 1,
-        scrollTrigger: { trigger: section, start: 'top 75%', toggleActions:'play none none reverse' }
+        opacity: 0, y: 40, duration: 0.8,
+        scrollTrigger: { trigger: section, start: 'top 80%' }
       });
     });
 
-    // --- ANIMATION LOOP ---
+    // Animation Loop
     const clock = new THREE.Clock();
     function animate() {
       requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
       
-      knot.rotation.y += 0.002;
-      ico.rotation.x -= 0.003;
-      ico.rotation.y -= 0.003;
+      // Shape hamesha dheere-dheere ghumti rahegi
+      knot.rotation.y += 0.003;
+      ico.rotation.x -= 0.004;
+      ico.rotation.y -= 0.004;
       
       renderer.render(scene, camera);
     }
     animate();
 
-    // --- RESIZE ---
+    // Resize
     window.addEventListener('resize', () => {
       camera.aspect = innerWidth/innerHeight;
       camera.updateProjectionMatrix();
