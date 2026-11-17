@@ -33,30 +33,32 @@
   /* Main Sections */
   main { position:relative; z-index:1; background:var(--bg); }
   .section { 
-    min-height:100vh; padding:8rem 6vw; position:relative; 
+    min-height:100vh; padding:6rem 6vw; position:relative; 
     display: flex; flex-direction: column; justify-content: center;
   }
   
-  /* Text background overlay so text is readable over 3D */
+  /* Text background overlay */
   .content-box {
-    background: rgba(10, 10, 10, 0.7);
+    background: rgba(10, 10, 10, 0.75);
     backdrop-filter: blur(10px);
-    padding: 3rem;
+    -webkit-backdrop-filter: blur(10px);
+    padding: 2rem;
     border-radius: 24px;
     border: 1px solid rgba(255,255,255,0.05);
     max-width: 800px;
+    width: 100%;
   }
 
   .section h2 { font-size:clamp(2rem,5vw,4rem); font-weight:800; margin-bottom:2rem; letter-spacing:-0.02em; }
   .section h2 span { color:var(--accent); }
 
-  .project-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:2rem; }
+  .project-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.5rem; }
   .project-card {
-    background:#141414; border:1px solid #222; border-radius:16px; padding:2rem;
+    background:#141414; border:1px solid #222; border-radius:16px; padding:1.5rem;
     transition:transform .4s ease,border-color .4s ease;
   }
   .project-card:hover { transform:translateY(-6px); border-color:var(--accent); }
-  .project-card h3 { font-size:1.5rem; margin-bottom:.75rem; }
+  .project-card h3 { font-size:1.3rem; margin-bottom:.75rem; }
   .project-card p { color:var(--muted); font-size:.95rem; line-height:1.6; }
   .project-card .tags { margin-top:1.5rem; display:flex; gap:.5rem; flex-wrap:wrap; }
   .project-card .tag {
@@ -73,7 +75,7 @@
   }
   .contact-links a:hover { color:var(--accent); }
 
-  footer { padding:2rem 6vw; color:var(--muted); font-size:.85rem; border-top:1px solid #1a1a1a; text-align: center; }
+  footer { padding:2rem 6vw; color:var(--muted); font-size:.85rem; border-top:1px solid #1a1a1a; text-align: center; position: relative; z-index: 2; background: var(--bg); }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -152,8 +154,12 @@
     const wrap = document.getElementById('canvas-wrap');
     const scene = new THREE.Scene();
     
+    // Mobile aur Desktop ke hisaab se camera adjust karna
+    const isMobile = window.innerWidth < 768;
     const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 100);
-    camera.position.set(0, 0, 6);
+    
+    // Agar mobile hai to camera thoda peeche (zoom out) hoga taaki shape puri dikhe
+    camera.position.set(0, 0, isMobile ? 10 : 6);
 
     const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
     renderer.setSize(innerWidth, innerHeight);
@@ -187,28 +193,30 @@
     );
     group.add(ico);
 
-    // --- FULL PAGE SCROLL ANIMATION (Master Timeline) ---
-    // Yeh timeline scroll ke hisaab se chalega (scrub: 1)
+    // --- FULL PAGE SCROLL ANIMATION (RESPONSIVE) ---
+    // Mobile par shape kam move karegi taaki screen se bahar na jaye
+    const moveDist = isMobile ? 0.5 : 1;
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: "body",
         start: "top top",
         end: "bottom bottom",
-        scrub: 1.5, // Smoothness
+        scrub: 1.5,
       }
     });
 
-    // 1. HERO to ABOUT (Object neeche jayega aur ghumega)
-    tl.to(group.position, { y: -3, z: -2, duration: 2 }, 0)
+    // 1. HERO to ABOUT (Object neeche jayega)
+    tl.to(group.position, { y: -2 * moveDist, z: -1, duration: 2 }, 0)
       .to(group.rotation, { x: Math.PI * 2, y: Math.PI * 2, duration: 2 }, 0)
       
-    // 2. ABOUT to PROJECTS (Object side me jayega taaki text dikhe)
-      .to(group.position, { x: -3, y: -6, z: -5, duration: 2 }, 2)
+    // 2. ABOUT to PROJECTS (Object side me jayega)
+      .to(group.position, { x: isMobile ? -1 : -3, y: -4 * moveDist, z: -2, duration: 2 }, 2)
       .to(group.rotation, { x: Math.PI * 4, y: Math.PI * 4, duration: 2 }, 2)
       
-    // 3. PROJECTS to CONTACT (Object wapas center me aayega aur bada hoga)
-      .to(group.position, { x: 0, y: -12, z: -10, duration: 2 }, 4)
-      .to(group.scale, { x: 2, y: 2, z: 2, duration: 2 }, 4)
+    // 3. PROJECTS to CONTACT (Object wapas center me)
+      .to(group.position, { x: 0, y: -6 * moveDist, z: -3, duration: 2 }, 4)
+      .to(group.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 2 }, 4)
       .to(group.rotation, { x: Math.PI * 6, y: Math.PI * 6, duration: 2 }, 4);
 
     // Text sections fade in
@@ -225,13 +233,9 @@
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
       
-      // Continuous inner rotation
       knot.rotation.y += 0.002;
       ico.rotation.x -= 0.003;
       ico.rotation.y -= 0.003;
-      
-      // Halka floating effect
-      group.position.x += Math.sin(t) * 0.001; 
       
       renderer.render(scene, camera);
     }
